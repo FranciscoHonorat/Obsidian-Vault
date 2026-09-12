@@ -1,0 +1,1 @@
+Projetos simples inicialmente para aprofundamento, tudo escrito a mão, usando documentação e em casos de erro que eu não consiga resolver usar IA.

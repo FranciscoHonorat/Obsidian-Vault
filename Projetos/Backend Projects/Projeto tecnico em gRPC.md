@@ -1,0 +1,3 @@
+Utilizando a comunicação RPC e o protocolo gRPC para desenvolver um projeto básico voltado para alguma área do domínio ambiental, ai é de se pensar e refletir o que vamos desenvolver.
+
+Porém, já temos um objetivo bem definido que é aprofundamento tecnico nesse protocolo que acredito que vai ser explorado em cápitulo seguintes do livro Designing Web APIs Building APIs That Developers Love. Porém [[Capitulo 2 - API Paradigms]] uma noção rápida do que posso fazer, agora vem a ideia de pensar em um problema que tenho ou que posso investigar e tentar resolver.
