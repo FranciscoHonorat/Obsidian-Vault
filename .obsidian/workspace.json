@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "36a477e5fe9c25dd",
+        "id": "dd1777d4bd91e421",
         "type": "tabs",
         "children": [
           {
-            "id": "b537cc061f30cfd4",
+            "id": "d2c431b88ee6931d",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Projetos/Prática das revisões/Algoritmos e Estrutura de dados/Arrays/Projeto - Geo Analyzer.md",
+                "file": "Projetos/Gameficação.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Projeto - Geo Analyzer"
+              "title": "Gameficação"
             }
           }
         ]
@@ -213,10 +213,18 @@
       "bases:Criar nova base": false
     }
   },
-  "active": "b537cc061f30cfd4",
+  "active": "d2c431b88ee6931d",
   "lastOpenFiles": [
-    "Estudos/Algoritmos e Estruturas de Dados/Algoritmos/Arrays/Sliding Window.md",
+    "Estudos/Algoritmos e Estruturas de Dados/Estruturas de Dados/Graphs/Conceitos/Weighted vs Unweighted.md",
+    "Projetos/Gameficação.md",
+    "Estudos/Observability",
+    "Estudos/Algoritmos e Estruturas de Dados/Estruturas de Dados/Graphs/Conceitos/Vértice - Node.md",
+    "Estudos/Algoritmos e Estruturas de Dados/Estruturas de Dados/Graphs/Conceitos/Directed vs Undirected.md",
+    "Estudos/Algoritmos e Estruturas de Dados/Estruturas de Dados/Graphs/Conceitos/Cycles.md",
+    "Estudos/Algoritmos e Estruturas de Dados/Estruturas de Dados/Graphs/Conceitos/Aresta - Edge.md",
+    "Clube do livro/Designing Web APIs Building APIs That Developers Love/Capitulo 2 - API Paradigms.md",
     "Projetos/Prática das revisões/Algoritmos e Estrutura de dados/Arrays/Projeto - Geo Analyzer.md",
+    "Estudos/Algoritmos e Estruturas de Dados/Algoritmos/Arrays/Sliding Window.md",
     "Projetos/Prática das revisões/Algoritmos e Estrutura de dados/Arrays",
     "Projetos/Prática das revisões/Algoritmos e Estrutura de dados",
     "Projetos/Prática das revisões",
@@ -233,24 +241,16 @@
     "Clube do livro/Fundamentos da Arquitetura de Software.md",
     "Clube do livro/Designing Web APIs Building APIs That Developers Love/Capitulo 1 - What's an API?.md",
     "Clube do livro/Designing Web APIs Building APIs That Developers Love/Nota.md",
-    "Clube do livro/Designing Web APIs Building APIs That Developers Love/Capitulo 2 - API Paradigms.md",
-    "Estudos/Algoritmos e Estruturas de Dados/Estruturas de Dados/Graphs/Conceitos/Aresta - Edge.md",
     "Estudos/Algoritmos e Estruturas de Dados/Algoritmos/Graphs/Prim.md",
     "Estudos/Algoritmos e Estruturas de Dados/Algoritmos/Graphs/Kruskal.md",
     "Estudos/Algoritmos e Estruturas de Dados/Algoritmos/Graphs/Union-Find.md",
     "Estudos/Algoritmos e Estruturas de Dados/Algoritmos/Graphs/Topological Sort.md",
-    "Estudos/Algoritmos e Estruturas de Dados/Algoritmos/Graphs/Bellman-Ford.md",
-    "Estudos/Algoritmos e Estruturas de Dados/Algoritmos/Graphs/Dijkstra.md",
-    "Estudos/Algoritmos e Estruturas de Dados/Estruturas de Dados/Graphs/Traversal/BFS.md",
     "Estudos/Algoritmos e Estruturas de Dados/Algoritmos/Graphs",
     "Estudos/Algoritmos e Estruturas de Dados/Algoritmos/Arrays",
-    "Estudos/Algoritmos e Estruturas de Dados/Estruturas de Dados/Graphs/Traversal/DFS.md",
-    "Estudos/Algoritmos e Estruturas de Dados/Estruturas de Dados/Graphs/Representações/Edge List.md",
     "Estudos/Algoritmos e Estruturas de Dados/Estruturas de Dados/Graphs/Traversal",
     "Estudos/Algoritmos e Estruturas de Dados/Estruturas de Dados/Graphs/Representações/Sem título",
     "Estudos/Algoritmos e Estruturas de Dados/Estruturas de Dados/Graphs/Representações",
     "Estudos/Algoritmos e Estruturas de Dados/Estruturas de Dados/Graphs/Conceitos",
-    "Estudos/Algoritmos e Estruturas de Dados/Estruturas de Dados/Graphs",
     "TCC/Pasted image 20260811003628.png",
     "TCC/Pasted image 20260811003255.png"
   ]
