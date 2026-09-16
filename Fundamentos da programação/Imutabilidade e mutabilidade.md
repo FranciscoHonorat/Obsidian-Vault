@@ -1,0 +1,3 @@
+A mutabilidade permite alterar o estado de um objeto após sua criação, enquanto a imutabilidade garante que o estado de um objeto não possa ser alterado depois de criado. Em linguagens de programação, a escolha entre mutabilidade e imutabilidade pode afetar a segurança, a legibilidade e a manutenção do código.
+
+Comportamento em Go: Go é predominamente uma linguagem de programação mutável, permitindo que os valores das variáveis sejam alterados após sua criação. No entanto, Go também oferece suporte a timpo de dados imutáveis, como strings e arrays, que não podem ser modificados após sua criação. Além disso, Go permite a criação de tipos personalizados que podem ser projetados para serem imutáveis.
