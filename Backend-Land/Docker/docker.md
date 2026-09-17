@@ -213,3 +213,121 @@ As soluções para o problema com o cache incluem:
 - **Uso de tags de versão**: Ao utilizar tags de versão para imagens base e dependências, os desenvolvedores podem garantir que as construções subsequentes utilizem versões específicas e consistentes, evitando problemas de cache relacionados a alterações em imagens base ou dependências externas. Isso ajuda a manter a consistência e a confiabilidade das imagens de contêiner construídas, mesmo quando o cache é reutilizado.
 - **Testes e validação**: Realizar testes e validação das imagens de contêiner construídas pode ajudar a identificar problemas relacionados ao cache e garantir que as alterações no Dockerfile sejam refletidas corretamente nas construções subsequentes. Testes automatizados e pipelines de integração contínua podem ser configurados para verificar a consistência e a funcionalidade das imagens de contêiner, garantindo que o cache seja gerenciado de forma eficaz e que as construções subsequentes sejam confiáveis e eficientes.
 
+#### Image Size and Security
+
+A ideia central é que cada coisa desnecessária dentro da imagem é peso e também superfície de ataque. Por isso reduzir o tamanho e aumentar a segurança acabam sendo o mesmo trabalho.
+
+Por que tamanho e segurança andam juntos?
+
+Em um build tradicional, tudo roda em sequência num único ambiente: baixar dependências, compilar e empacotar, e todas essas camadas acabam ficando na imagem final. o que resulta em imagens inchadas e aumenta os riscos de segurança.
+
+A documentação de boas práticas reforça isso na escolha da base: uma imagem menor oferece portabilidade e downloads rápidos, reduz o tamanho da imagem e diminui a quantidade vulnerabilidades trazidas pelas dependências. Em produção, compiladores, ferramentas de build e de debug normalmente não são necessários, e uma imagem pequena com poucas dependências reduz bastante a superfície de ataque.
+
+Na prática: se um atacante conseguir executar algo dentro do container, ele terá disposiçõa apenas do que você colocou lá. Sem shell, sem curl, sem compilador, o que ele consegue fazer fica muito limitado.
+
+Multi-stage builds: o mecanismo principal
+
+A ideia é simples. Você usa várias instruções FROM no Dockerfile, cada uma pode usar uma base diferente e cada uma inicia um novo estágio. Você copia seletivamente artefatos de um estágio para outro e deixa para trás tudo o que não quer na imagem final.
+
+```dockerfile
+FROM golang:1.26 AS build
+WORKDIR /src
+COPY main.go .
+RUN go build -o /bin/hello ./main.go
+
+FROM scratch
+COPY --from=build /bin/hello /bin/hello
+CMD ["/bin/hello"]
+```
+O resultado, segundo a documentação é que uma iamgem de produção mínima contendo só o binário, sem nenhuma ferramenta de build. 
+
+O funcionamento: o segundo FROM inicia um novo estágio com a imagem scratch, o COPY --from traz apenas o artefato compilado, e o SDK do Go e os arquivos intermediários ficam de fora da imagem final.
+
+Alguns recursos que merece destaque no multi-stage é:
+
+Nomear estágios com AS nome. assim mesmo que as instruções sejam reordenadas depois, o COPY não quebra, o que acontece quando você usa --from=0.
+
+Parar em um estágio específico com --target. A doc cita como casos de uso depurar um estágio, ter um estágio debug com símbolos e ferramentas e outro production enxuto, ou um estáigo de testes com dados de teste.
+
+Copiar de uma imagem externa: O COPY --from não se limita a estágios do próprio Dockerfile, e pode puxar aquivos de outra imagem local ou de um registry.
+
+BuildKit é mais eficiente: ele só constrói os estágios dos quais o target depende, enquanto o builder legado processa todos até o target.
+
+Um cuidado: com scrath, a imagem não tem nada. A doc de C++ lembra que, como a base é vaiza, as ferramenteas comuns do sistema operacional também não existem, então nem um ls funciona dentro do container. Isso é ótimo para segurança e ruim para debug, e é por isso que o estágio debug separado faz sentido.
+
+Boas práticas que afetam tamanho e segunraça
+
+Escolher uma base confiável e pequena.
+
+O primeiro passo para uma imaem segura é escolher a base cera: de fonte confiável e pequena. A doc aponta três programas:
+Docker Official Images, Verified Publisher e Docker-Sponsored Open Source. Sobre Alpine, a Docker recomenda por ser bem controlada e pequena (menos de 6MB), mas ainda uma distribuição Linux completa.
+
+Rebuild frequente.
+
+Imagens são imutáveis: construir uma imagem é tirar um snapshot daquele momento, incluindo base, bibliotecas e tudo mais. Para manter imagens atualizadas e seguras, reconstrua regularmente com dependências atualizadas. Aqui entram duas flags distintas: --pull força o Docker a busca uma versão mais recente da imagem base mesmo que exista uma em cache, e --no--cache que vai desativar o cache e reconstroi todas as camadas, mas não puxa base nova. Dá para combinas as duas.
+
+Fixar versão por digest.
+
+Tas são mutáveis: alpine:3.21 pode apontar para 3.21.1 hoje e daqui a três meses a 3.21.4. Para integridade da cadeia de suprimentos, você pode fixar a imagem em um digest específico, garantindo sempre a mesma versão mesmo que o publisher substitua a tag. O trade-off é explícito na doc: isso dá mais trabalho manual e você abre mão de correções de segurança automáticas. A solução sugerida é o GitHub Dependabot com package-ecosystem: "docker", que abre PRs atualizando tags e digests dando controle e trilha de auditoria.
+
+Não instalar pacotes desnecessários.
+
+Evitar pacotes extras reduz complexidade, dependências, tamanho dos arquivos e tempo de build. No caso do apt-get, a doc recomenda sempre update e install no mesmo RUN, com --no-install-recommends, e acrescenta que remover /var/lib/apt/lists reduz o tamanho da imagem, já que o cache do apt não fica armazenado numa camada.
+
+Usar .dockerignore.
+
+Ele exclui arquivos irrelevantes para o build usando padrões parecido com os do .gitignore. Isso evita mandar .git, .env e binários locais para o contexto de build (e, por acidente, para dentor da imagem.)
+
+Cuidado com segredos em camadas. 
+
+Este é o ponto mais sutil. Cada ENV cria uma camada intermediária, então mesmo que você remova a variável depois, ela continua naquela camada e o valor pode ser extraído. O mesmo vale para arquivos: um COPY de credencial seguido de RUN rm não apaga nada da cama anterior. Para segredos de build, o caminho correto é RUN --mount=type=secret (página build secrets da doc), que monta o segredo só durante aquele comando.
+
+Prefirir bind mounts a COPY temporário. Arquivos montados via bind mount só existem durante aquele RUN e não persistem na imagem final.
+
+Rodar como usuário não root. 
+
+Se o serviço funciona sem privilégios, use USER para trocar um usuário não root, considerando um UID/CID explícito, já que os IDs atribuídos automaticamente não são determinísticos entre rebuilds. A doc também pede para evitar instalar ou usar sudo.
+
+```dockerfile
+#estágio de build
+FROM golang:1.26-alpine AS build
+WORKDIR /src
+
+# Dependências primeiro, para aproveitar o cache de camadas.
+RUN --mount=type=cache, target=/go/pkg/mod \
+    --mount=type=bind,source=go.mod,target=go.mod \
+    --mount=type=bind,source=go.sum,target=go.sum \
+    go mod download
+
+# Binaário estático, sem CGO, sem tabela de símbolos
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=bind,target=. \
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /bin/app ./cmd/api
+
+#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
