@@ -305,7 +305,50 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=bind,target=. \
     CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /bin/app ./cmd/api
 
-#
+# Certificado CA (nessários se o app faz chamadas HTTPS)
+RUN --mount=type=cache,target=/var/cache/apk \
+    apk add --no-cache ca-certificates
+
+# Estágio final: vazio
+FROM scratch
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build /bin/app /app
+
+# scratch não tem /etc/passwd, então o UID/CID precisa ser explícito
+USER 1000:1000
+EXPOSE 8080
+ENTRYPOINT ["/app"]
+```
+E um .dockerignore para esse exemplo:
+
+```
+# Ignora arquivos de build locais
+.git
+.env
+*.md
+bin/
+tmp/
+```
+Para build de produção atualizado: docker build --pull --no-cache -t myapp:latest .
+
+O que cada decisão entrega: o estágio build carrega todo o toolcahin Go, mas nada dele vai para a imagem final. Os --mount=type=bind evitam camadas de COPY com o código fonte no builder. scratch elimina shell e gerenciador de pacotes. USER numérico garante que o processo não roda como root. Se você precisar depurar, basta criar um estágio debug baseado em alpine e usar --target debug.
+
+Uma alternativa ao scratch é uma imagem distrolles ou uma Docker Hardened Image, que já trazem certificados e um usuário não root configurados. A seção Docker Hardened Images da documentação cobre isso e traz links para imagens oficiais e de terceiros.
+
+### Container Registries
+
+Registries são o ponto de build e deploy se encontram: é o npm/Maven das imagns.
+
+#### O que é um container registry, tecnicamente?
+
+Registry é um servidor HTTP que implementa a OCI Distribution Specification, Tudo tira em torno de dois endpoints:
+- /v2/<name>/manifests/<reference>: o manifesta, um JSON que descrve a imagem, suas camadas e metadados. (config+list de layers, cada um por digest)
+- /v2/<name>/blobs/<digest>: os blocos, ou seja as camadas comprimidas e o config JSON. O registry não precisa armazenar as camadas, ele pode ser um proxy para outro registry, e o Docker Engine sabe lidar com isso.
+
+O que isso implica na prática:
+
+Conteúdo é endereçado por digest. sha256:abc... é o hash do manifest. Uma tag é apenas um ponteiro mutável para um digest, exatamente como um branch do Git aponta para um commit. Por isso a documentação do Docker diz que tags são mutáveis e  que fixar por digest garante sempre a mesma versão da imagem, mesmo que o publisher substitua a tag.
+
 
 
 
